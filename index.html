@@ -70,6 +70,16 @@
             color: #2d3436;
             line-height: 1.5;
         }
+        .win-box {
+            background: #dff9fb;
+            border-left: 5px solid #00b894;
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 14px;
+            color: #2d3436;
+            line-height: 1.5;
+        }
         @keyframes naik {
             0% { opacity: 1; transform: translateY(0); }
             100% { opacity: 0; transform: translateY(-45px); }
@@ -80,7 +90,7 @@
 
 <div id="game-box">
     <div id="top-bar">
-        <div>⭐ Skor: <span id="skor">0</span></div>
+        <div>⭐ Skor: <span id="skor">0</span> / 500</div>
         <div>❤️ Nyawa: <span id="nyawa">3</span></div>
     </div>
 
@@ -91,7 +101,7 @@
     <!-- MENU AWAL -->
     <div id="menu-awal" class="overlay">
         <h1 style="margin:0 0 10px; color:#2d3436;">🍎 Tangkap Sehat 🥦</h1>
-        <p style="color:#636e72; font-size:14px;">Geser karakter untuk tangkap makanan sehat (+poin) & hindari makanan tidak sehat (-nyawa).</p>
+        <p style="color:#636e72; font-size:14px;">Kumpulkan <b>500 poin</b> makanan sehat untuk menang dan hindari makanan tidak sehat (-nyawa)!</p>
         
         <div style="margin: 15px 0; background:#f1f2f6; padding:12px; border-radius:12px; width:100%;">
             <label style="font-size:13px; font-weight:bold; display:block; margin-bottom:6px;">📸 Pilih Foto Karakter (Opsional):</label>
@@ -112,6 +122,19 @@
 
         <p style="font-size:18px; margin:8px 0 4px;">Skor Kamu: <b id="skor-akhir">0</b></p>
         <p style="font-size:14px; color:#636e72; margin:0 0 10px;">Skor Tertinggi: <b id="skor-tertinggi">0</b></p>
+        <button type="button" class="btn-main" onclick="mulaiGame()">🔄 MAIN LAGI</button>
+    </div>
+
+    <!-- MENU MENANG (500 POIN) -->
+    <div id="menu-menang" class="overlay" style="display:none;">
+        <div style="font-size: 55px; margin-bottom: 5px;">🏆🥗🥛</div>
+        <h1 style="color:#00b894; margin:0 0 8px; font-size: 28px;">SELAMAT, KAMU MENANG!</h1>
+        
+        <div class="win-box">
+            Luar biasa! Kamu berhasil mencapai <b>500 poin</b>. Ini membuktikan bahwa <b>kamu memiliki pola makan yang bagus dan sudah memenuhi gizi 4 Sehat 5 Sempurna</b>. Pertahankan gaya hidup sehatmu!
+        </div>
+
+        <p style="font-size:18px; margin:8px 0 10px;">Skor Maksimal: <b>500</b> ⭐</p>
         <button type="button" class="btn-main" onclick="mulaiGame()">🔄 MAIN LAGI</button>
     </div>
 </div>
@@ -174,6 +197,7 @@
     function mulaiGame() {
         document.getElementById('menu-awal').style.display = 'none';
         document.getElementById('menu-kalah').style.display = 'none';
+        document.getElementById('menu-menang').style.display = 'none';
 
         skor = 0;
         nyawa = 3;
@@ -244,7 +268,7 @@
         teks.style.top = (area.clientHeight - 90) + 'px';
 
         if (m.data.sehat) {
-            skor += m.data.poin;
+            skor = Math.min(500, skor + m.data.poin);
             teks.textContent = '+' + m.data.poin;
             teks.style.color = '#00b894';
         } else {
@@ -259,9 +283,20 @@
         area.appendChild(teks);
         setTimeout(function() { teks.remove(); }, 700);
 
-        if (nyawa <= 0) {
+        if (skor >= 500) {
+            menangGame();
+        } else if (nyawa <= 0) {
             selesaiGame();
         }
+    }
+
+    function menangGame() {
+        jalan = false;
+        clearInterval(loopGame);
+        clearInterval(loopMuncul);
+
+        localStorage.setItem('rekorSehat', 500);
+        document.getElementById('menu-menang').style.display = 'flex';
     }
 
     function selesaiGame() {
