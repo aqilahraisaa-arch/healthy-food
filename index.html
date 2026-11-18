@@ -32,7 +32,6 @@
             display: flex;
             flex-direction: column;
         }
-        /* Layar Menu / UI */
         .screen {
             position: absolute;
             top: 0;
@@ -82,7 +81,6 @@
         .file-input-container {
             margin: 15px 0;
         }
-        /* Area Game */
         #game-canvas-area {
             flex: 1;
             position: relative;
@@ -90,7 +88,6 @@
             overflow: hidden;
             cursor: pointer;
         }
-        /* Header Info Game */
         #game-header {
             background: #2d3436;
             color: white;
@@ -106,7 +103,6 @@
             align-items: center;
             gap: 5px;
         }
-        /* Karakter Pemain */
         #player {
             position: absolute;
             bottom: 20px;
@@ -121,7 +117,6 @@
             background-position: center;
             z-index: 5;
         }
-        /* Item Makanan */
         .item {
             position: absolute;
             width: 50px;
@@ -138,7 +133,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Efek pop angka */
         .floating-text {
             position: absolute;
             font-weight: bold;
@@ -173,7 +167,7 @@
             <p>Tangkap makanan sehat untuk menambah skor, dan hindari makanan tidak sehat agar nyawa tidak berkurang!</p>
             
             <div class="file-input-container">
-                <label style="font-size: 14px; color: #2d3436; display: block; margin-bottom: 5px;">Upload Foto Wajah Kamu:</label>
+                <label style="font-size: 14px; color: #2d3436; display: block; margin-bottom: 5px;">Upload Foto Wajah Kamu (Opsional):</label>
                 <input type="file" id="photo-upload" accept="image/*">
             </div>
 
@@ -206,11 +200,10 @@
         let lives = 3;
         let highScore = localStorage.getItem('highScore') || 0;
         let isPlaying = false;
-        let playerX = 185; // Posisi awal player (tengah)
+        let playerX = 185; 
         let gameInterval, itemSpawner;
         let items = [];
 
-        // Daftar Makanan Sehat & Tidak Sehat
         const foodTypes = [
             { emoji: '🍎', healthy: true, points: 10 },
             { emoji: '🥦', healthy: true, points: 15 },
@@ -223,7 +216,6 @@
             { emoji: '🥤', healthy: false, points: -15, damage: 1 }
         ];
 
-        // Upload Foto Wajah
         photoUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -235,10 +227,9 @@
             }
         });
 
-        // Kontrol Mouse / Touch Geser Karakter
         function updatePlayerPosition(clientX) {
             const rect = canvasArea.getBoundingClientRect();
-            let x = clientX - rect.left - 40; // Center offset
+            let x = clientX - rect.left - 40; 
             const maxX = canvasArea.clientWidth - 80;
             
             if (x < 0) x = 0;
@@ -259,7 +250,6 @@
             e.preventDefault();
         }, { passive: false });
 
-        // Mulai Game
         startBtn.addEventListener('click', startGame);
         restartBtn.addEventListener('click', startGame);
 
@@ -273,11 +263,9 @@
             livesEl.textContent = lives;
             isPlaying = true;
 
-            // Hapus sisa item lama
             document.querySelectorAll('.item').forEach(el => el.remove());
             items = [];
 
-            // Looping Utama Game
             if (gameInterval) clearInterval(gameInterval);
             if (itemSpawner) clearInterval(itemSpawner);
 
@@ -285,7 +273,6 @@
             itemSpawner = setInterval(spawnItem, 800);
         }
 
-        // Munculkan Makanan dari Atas
         function spawnItem() {
             if (!isPlaying) return;
 
@@ -305,4 +292,27 @@
                 data: foodData
             };
 
-            itemEl
+            itemEl.style.left = startX + 'px';
+            itemEl.style.top = itemObj.y + 'px';
+            canvasArea.appendChild(itemEl);
+            items.push(itemObj);
+        }
+
+        function updateGame() {
+            for (let i = items.length - 1; i >= 0; i--) {
+                let item = items[i];
+                item.y += item.speed;
+                item.element.style.top = item.y + 'px';
+
+                const playerTop = canvasArea.clientHeight - 100;
+                
+                if (
+                    item.y + 50 >= playerTop && 
+                    item.y <= playerTop + 80 &&
+                    item.x + 50 >= playerX && 
+                    item.x <= playerX + 80
+                ) {
+                    handleCollision(item);
+                    item.element.remove();
+                    items.splice(i, 1);
+                    continue
