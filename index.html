@@ -9,7 +9,7 @@
         body {
             margin: 0; padding: 0;
             background: #2d3436;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex; justify-content: center; align-items: center;
             height: 100dvh; overflow: hidden;
         }
@@ -44,7 +44,7 @@
         }
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.96);
+            background: rgba(255,255,255,0.97);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             padding: 25px; text-align: center; z-index: 99;
         }
@@ -59,6 +59,16 @@
             position: absolute; font-weight: bold; font-size: 22px;
             pointer-events: none; z-index: 10;
             animation: naik 0.7s ease-out forwards;
+        }
+        .info-box {
+            background: #ffeaa7;
+            border-left: 5px solid #d63031;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 14px;
+            color: #2d3436;
+            line-height: 1.5;
         }
         @keyframes naik {
             0% { opacity: 1; transform: translateY(0); }
@@ -81,7 +91,7 @@
     <!-- MENU AWAL -->
     <div id="menu-awal" class="overlay">
         <h1 style="margin:0 0 10px; color:#2d3436;">🍎 Tangkap Sehat 🥦</h1>
-        <p style="color:#636e72; font-size:14px;">Geser karakter untuk tangkap makanan sehat (+poin) & hindari junk food (-nyawa).</p>
+        <p style="color:#636e72; font-size:14px;">Geser karakter untuk tangkap makanan sehat (+poin) & hindari makanan tidak sehat (-nyawa).</p>
         
         <div style="margin: 15px 0; background:#f1f2f6; padding:12px; border-radius:12px; width:100%;">
             <label style="font-size:13px; font-weight:bold; display:block; margin-bottom:6px;">📸 Pilih Foto Karakter (Opsional):</label>
@@ -91,11 +101,17 @@
         <button type="button" class="btn-main" onclick="mulaiGame()">▶ MULAI GAME</button>
     </div>
 
-    <!-- MENU KALAH -->
+    <!-- MENU KALAH (OBESITAS) -->
     <div id="menu-kalah" class="overlay" style="display:none;">
-        <h1 style="color:#d63031; margin:0 0 10px;">Game Over! 🎮</h1>
-        <p style="font-size:18px; margin:5px 0;">Skor Kamu: <b id="skor-akhir">0</b></p>
-        <p style="font-size:15px; color:#636e72; margin:5px 0 15px;">Skor Tertinggi: <b id="skor-tertinggi">0</b></p>
+        <div style="font-size: 50px; margin-bottom: 5px;">🍔⚠️</div>
+        <h1 style="color:#d63031; margin:0 0 8px; font-size: 28px;">KAMU OBESITAS!</h1>
+        
+        <div class="info-box">
+            Hal ini terjadi <b>karena kebanyakan mengonsumsi makanan yang tidak sehat atau cepat saji</b> yang tinggi gula, garam, dan lemak jenuh. Yuk, jaga pola makan seimbang!
+        </div>
+
+        <p style="font-size:18px; margin:8px 0 4px;">Skor Kamu: <b id="skor-akhir">0</b></p>
+        <p style="font-size:14px; color:#636e72; margin:0 0 10px;">Skor Tertinggi: <b id="skor-tertinggi">0</b></p>
         <button type="button" class="btn-main" onclick="mulaiGame()">🔄 MAIN LAGI</button>
     </div>
 </div>
