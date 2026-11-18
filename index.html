@@ -2,317 +2,266 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Tangkap Makanan Sehat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tangkap Makanan Sehat</title>
     <style>
-        * {
-            box-sizing: border-box;
-            user-select: none;
-        }
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
         body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #74b9ff, #a29bfe);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-        #game-container {
-            width: 100%;
-            max-width: 450px;
-            height: 100%;
-            max-height: 800px;
-            background: #ffffff;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-        }
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-            padding: 20px;
-            text-align: center;
-        }
-        .hidden {
-            display: none !important;
-        }
-        h1 {
-            color: #2d3436;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-        p {
-            color: #636e72;
-            margin-bottom: 20px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        .btn {
-            background-color: #00b894;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 16px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,184,148,0.4);
-            transition: 0.2s;
-            margin: 5px;
-        }
-        .btn:hover {
-            background-color: #00a885;
-            transform: translateY(-2px);
-        }
-        .file-input-container {
-            margin: 15px 0;
-        }
-        #game-canvas-area {
-            flex: 1;
-            position: relative;
-            background: url('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80') center/cover;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        #game-header {
+            margin: 0; padding: 0;
             background: #2d3436;
-            color: white;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            font-size: 16px;
+            font-family: sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            height: 100dvh; overflow: hidden;
         }
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        #game-box {
+            width: 100%; max-width: 450px; height: 100%;
+            background: #dfe6e9; position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        #top-bar {
+            background: #00b894; color: white; padding: 14px 20px;
+            display: flex; justify-content: space-between;
+            font-weight: bold; font-size: 18px; z-index: 2;
+        }
+        #play-area {
+            flex: 1; position: relative;
+            background: linear-gradient(to bottom, #81ecec, #74b9ff);
+            overflow: hidden; touch-action: none;
         }
         #player {
-            position: absolute;
-            bottom: 20px;
-            left: calc(50% - 40px);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 4px solid #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            background-color: #dfe6e9;
-            background-size: cover;
-            background-position: center;
+            position: absolute; bottom: 25px; left: 150px;
+            width: 75px; height: 75px; border-radius: 50%;
+            border: 4px solid #fff; background-color: #ffeaa7;
+            background-size: cover; background-position: center;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 40px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             z-index: 5;
         }
-        .item {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 28px;
+        .food {
+            position: absolute; width: 48px; height: 48px;
+            font-size: 36px; display: flex; justify-content: center; align-items: center;
             z-index: 4;
-            animation: rotateItem 3s infinite linear;
         }
-        @keyframes rotateItem {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.96);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 25px; text-align: center; z-index: 99;
         }
-        .floating-text {
-            position: absolute;
-            font-weight: bold;
-            font-size: 20px;
-            animation: floatUp 0.8s ease-out forwards;
-            z-index: 6;
-            pointer-events: none;
+        .btn-main {
+            background: #00b894; color: white; border: none;
+            padding: 15px 35px; font-size: 18px; font-weight: bold;
+            border-radius: 30px; cursor: pointer; margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0,184,148,0.4);
         }
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-40px); opacity: 0; }
+        .btn-main:active { transform: scale(0.95); }
+        .pop {
+            position: absolute; font-weight: bold; font-size: 22px;
+            pointer-events: none; z-index: 10;
+            animation: naik 0.7s ease-out forwards;
+        }
+        @keyframes naik {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-45px); }
         }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <!-- HEADER STATS -->
-        <div id="game-header">
-            <div class="stat-item">⭐ Skor: <span id="score">0</span></div>
-            <div class="stat-item">❤️ Nyawa: <span id="lives">3</span></div>
-        </div>
-
-        <!-- AREA PERMAINAN -->
-        <div id="game-canvas-area">
-            <div id="player"></div>
-        </div>
-
-        <!-- LAYAR UTAMA (MENU) -->
-        <div id="start-screen" class="screen">
-            <h1>🍎 Tangkap Makanan Sehat 🥦</h1>
-            <p>Tangkap makanan sehat untuk menambah skor, dan hindari makanan tidak sehat agar nyawa tidak berkurang!</p>
-            
-            <div class="file-input-container">
-                <label style="font-size: 14px; color: #2d3436; display: block; margin-bottom: 5px;">Upload Foto Wajah Kamu (Opsional):</label>
-                <input type="file" id="photo-upload" accept="image/*">
-            </div>
-
-            <button class="btn" id="start-btn">Mulai Game</button>
-        </div>
-
-        <!-- LAYAR GAME OVER -->
-        <div id="game-over-screen" class="screen hidden">
-            <h1>Game Over! 🎮</h1>
-            <p>Skor Akhir Kamu: <span id="final-score">0</span></p>
-            <p>Skor Tertinggi: <span id="high-score">0</span></p>
-            <button class="btn" id="restart-btn">Main Lagi</button>
-        </div>
+<div id="game-box">
+    <div id="top-bar">
+        <div>⭐ Skor: <span id="skor">0</span></div>
+        <div>❤️ Nyawa: <span id="nyawa">3</span></div>
     </div>
 
-    <script>
-        const startScreen = document.getElementById('start-screen');
-        const gameOverScreen = document.getElementById('game-over-screen');
-        const startBtn = document.getElementById('start-btn');
-        const restartBtn = document.getElementById('restart-btn');
-        const scoreEl = document.getElementById('score');
-        const livesEl = document.getElementById('lives');
-        const finalScoreEl = document.getElementById('final-score');
-        const highScoreEl = document.getElementById('high-score');
-        const canvasArea = document.getElementById('game-canvas-area');
-        const player = document.getElementById('player');
-        const photoUpload = document.getElementById('photo-upload');
+    <div id="play-area">
+        <div id="player">😋</div>
+    </div>
 
-        let score = 0;
-        let lives = 3;
-        let highScore = localStorage.getItem('highScore') || 0;
-        let isPlaying = false;
-        let playerX = 185; 
-        let gameInterval, itemSpawner;
-        let items = [];
+    <!-- MENU AWAL -->
+    <div id="menu-awal" class="overlay">
+        <h1 style="margin:0 0 10px; color:#2d3436;">🍎 Tangkap Sehat 🥦</h1>
+        <p style="color:#636e72; font-size:14px;">Geser karakter untuk tangkap makanan sehat (+poin) & hindari junk food (-nyawa).</p>
+        
+        <div style="margin: 15px 0; background:#f1f2f6; padding:12px; border-radius:12px; width:100%;">
+            <label style="font-size:13px; font-weight:bold; display:block; margin-bottom:6px;">📸 Pilih Foto Karakter (Opsional):</label>
+            <input type="file" id="foto-input" accept="image/*" onchange="gantiFoto(event)" style="width:100%;">
+        </div>
 
-        const foodTypes = [
-            { emoji: '🍎', healthy: true, points: 10 },
-            { emoji: '🥦', healthy: true, points: 15 },
-            { emoji: '🥕', healthy: true, points: 10 },
-            { emoji: '🍌', healthy: true, points: 10 },
-            { emoji: '🥑', healthy: true, points: 20 },
-            { emoji: '🍔', healthy: false, points: -10, damage: 1 },
-            { emoji: '🍕', healthy: false, points: -10, damage: 1 },
-            { emoji: '🍩', healthy: false, points: -15, damage: 1 },
-            { emoji: '🥤', healthy: false, points: -15, damage: 1 }
-        ];
+        <button type="button" class="btn-main" onclick="mulaiGame()">▶ MULAI GAME</button>
+    </div>
 
-        photoUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    player.style.backgroundImage = `url('${event.target.result}')`;
-                }
-                reader.readAsDataURL(file);
+    <!-- MENU KALAH -->
+    <div id="menu-kalah" class="overlay" style="display:none;">
+        <h1 style="color:#d63031; margin:0 0 10px;">Game Over! 🎮</h1>
+        <p style="font-size:18px; margin:5px 0;">Skor Kamu: <b id="skor-akhir">0</b></p>
+        <p style="font-size:15px; color:#636e72; margin:5px 0 15px;">Skor Tertinggi: <b id="skor-tertinggi">0</b></p>
+        <button type="button" class="btn-main" onclick="mulaiGame()">🔄 MAIN LAGI</button>
+    </div>
+</div>
+
+<script>
+    var skor = 0;
+    var nyawa = 3;
+    var jalan = false;
+    var posisiX = 150;
+    var daftarMakanan = [];
+    var loopGame, loopMuncul;
+
+    var area = document.getElementById('play-area');
+    var pemain = document.getElementById('player');
+
+    var listItem = [
+        { ikon: '🍎', sehat: true, poin: 10 },
+        { ikon: '🥦', sehat: true, poin: 15 },
+        { ikon: '🥕', sehat: true, poin: 10 },
+        { ikon: '🍌', sehat: true, poin: 10 },
+        { ikon: '🥑', sehat: true, poin: 20 },
+        { ikon: '🍔', sehat: false, poin: -10 },
+        { ikon: '🍕', sehat: false, poin: -10 },
+        { ikon: '🍩', sehat: false, poin: -15 },
+        { ikon: '🥤', sehat: false, poin: -15 }
+    ];
+
+    function gantiFoto(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            pemain.style.backgroundImage = "url('" + ev.target.result + "')";
+            pemain.textContent = "";
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function geserPemain(clientX) {
+        if (!jalan) return;
+        var rect = area.getBoundingClientRect();
+        var x = clientX - rect.left - 37.5;
+        var batasKanan = area.clientWidth - 75;
+        if (x < 0) x = 0;
+        if (x > batasKanan) x = batasKanan;
+        posisiX = x;
+        pemain.style.left = posisiX + 'px';
+    }
+
+    area.addEventListener('mousemove', function(e) { geserPemain(e.clientX); });
+    area.addEventListener('mousedown', function(e) { geserPemain(e.clientX); });
+    area.addEventListener('touchmove', function(e) {
+        geserPemain(e.touches[0].clientX);
+        e.preventDefault();
+    }, { passive: false });
+    area.addEventListener('touchstart', function(e) {
+        geserPemain(e.touches[0].clientX);
+    }, { passive: true });
+
+    function mulaiGame() {
+        document.getElementById('menu-awal').style.display = 'none';
+        document.getElementById('menu-kalah').style.display = 'none';
+
+        skor = 0;
+        nyawa = 3;
+        jalan = true;
+        document.getElementById('skor').textContent = skor;
+        document.getElementById('nyawa').textContent = nyawa;
+
+        posisiX = (area.clientWidth / 2) - 37.5;
+        pemain.style.left = posisiX + 'px';
+
+        var sisa = document.querySelectorAll('.food');
+        for (var i = 0; i < sisa.length; i++) { sisa[i].remove(); }
+        daftarMakanan = [];
+
+        clearInterval(loopGame);
+        clearInterval(loopMuncul);
+
+        loopGame = setInterval(updateFrame, 20);
+        loopMuncul = setInterval(buatMakanan, 750);
+    }
+
+    function buatMakanan() {
+        if (!jalan) return;
+        var data = listItem[Math.floor(Math.random() * listItem.length)];
+        var el = document.createElement('div');
+        el.className = 'food';
+        el.textContent = data.ikon;
+
+        var startX = Math.random() * (area.clientWidth - 48);
+        el.style.left = startX + 'px';
+        el.style.top = '-50px';
+        area.appendChild(el);
+
+        daftarMakanan.push({
+            el: el, x: startX, y: -50,
+            kecepatan: 3 + Math.random() * 2.5,
+            data: data
+        });
+    }
+
+    function updateFrame() {
+        var batasPemainY = area.clientHeight - 100;
+
+        for (var i = daftarMakanan.length - 1; i >= 0; i--) {
+            var m = daftarMakanan[i];
+            m.y += m.kecepatan;
+            m.el.style.top = m.y + 'px';
+
+            if (m.y + 45 >= batasPemainY && m.y <= batasPemainY + 75 &&
+                m.x + 45 >= posisiX && m.x <= posisiX + 75) {
+                kenaMakanan(m);
+                m.el.remove();
+                daftarMakanan.splice(i, 1);
+                continue;
             }
-        });
 
-        function updatePlayerPosition(clientX) {
-            const rect = canvasArea.getBoundingClientRect();
-            let x = clientX - rect.left - 40; 
-            const maxX = canvasArea.clientWidth - 80;
-            
-            if (x < 0) x = 0;
-            if (x > maxX) x = maxX;
-            
-            playerX = x;
-            player.style.left = playerX + 'px';
+            if (m.y > area.clientHeight) {
+                m.el.remove();
+                daftarMakanan.splice(i, 1);
+            }
+        }
+    }
+
+    function kenaMakanan(m) {
+        var teks = document.createElement('div');
+        teks.className = 'pop';
+        teks.style.left = m.x + 'px';
+        teks.style.top = (area.clientHeight - 90) + 'px';
+
+        if (m.data.sehat) {
+            skor += m.data.poin;
+            teks.textContent = '+' + m.data.poin;
+            teks.style.color = '#00b894';
+        } else {
+            skor = Math.max(0, skor + m.data.poin);
+            nyawa -= 1;
+            teks.textContent = m.data.poin + ' ❤️-1';
+            teks.style.color = '#d63031';
         }
 
-        canvasArea.addEventListener('mousemove', (e) => {
-            if (!isPlaying) return;
-            updatePlayerPosition(e.clientX);
-        });
+        document.getElementById('skor').textContent = skor;
+        document.getElementById('nyawa').textContent = nyawa;
+        area.appendChild(teks);
+        setTimeout(function() { teks.remove(); }, 700);
 
-        canvasArea.addEventListener('touchmove', (e) => {
-            if (!isPlaying) return;
-            updatePlayerPosition(e.touches[0].clientX);
-            e.preventDefault();
-        }, { passive: false });
-
-        startBtn.addEventListener('click', startGame);
-        restartBtn.addEventListener('click', startGame);
-
-        function startGame() {
-            startScreen.classList.add('hidden');
-            gameOverScreen.classList.add('hidden');
-            
-            score = 0;
-            lives = 3;
-            scoreEl.textContent = score;
-            livesEl.textContent = lives;
-            isPlaying = true;
-
-            document.querySelectorAll('.item').forEach(el => el.remove());
-            items = [];
-
-            if (gameInterval) clearInterval(gameInterval);
-            if (itemSpawner) clearInterval(itemSpawner);
-
-            gameInterval = setInterval(updateGame, 20);
-            itemSpawner = setInterval(spawnItem, 800);
+        if (nyawa <= 0) {
+            selesaiGame();
         }
+    }
 
-        function spawnItem() {
-            if (!isPlaying) return;
+    function selesaiGame() {
+        jalan = false;
+        clearInterval(loopGame);
+        clearInterval(loopMuncul);
 
-            const foodData = foodTypes[Math.floor(Math.random() * foodTypes.length)];
-            const itemEl = document.createElement('div');
-            itemEl.classList.add('item');
-            itemEl.textContent = foodData.emoji;
-
-            const maxX = canvasArea.clientWidth - 50;
-            const startX = Math.random() * maxX;
-
-            const itemObj = {
-                element: itemEl,
-                x: startX,
-                y: -50,
-                speed: 2 + Math.random() * 3,
-                data: foodData
-            };
-
-            itemEl.style.left = startX + 'px';
-            itemEl.style.top = itemObj.y + 'px';
-            canvasArea.appendChild(itemEl);
-            items.push(itemObj);
+        var rekor = localStorage.getItem('rekorSehat') || 0;
+        if (skor > rekor) {
+            rekor = skor;
+            localStorage.setItem('rekorSehat', rekor);
         }
-
-        function updateGame() {
-            for (let i = items.length - 1; i >= 0; i--) {
-                let item = items[i];
-                item.y += item.speed;
-                item.element.style.top = item.y + 'px';
-
-                const playerTop = canvasArea.clientHeight - 100;
-                
-                if (
-                    item.y + 50 >= playerTop && 
-                    item.y <= playerTop + 80 &&
-                    item.x + 50 >= playerX && 
-                    item.x <= playerX + 80
-                ) {
-                    handleCollision(item);
-                    item.element.remove();
-                    items.splice(i, 1);
-                    continue
+        document.getElementById('skor-akhir').textContent = skor;
+        document.getElementById('skor-tertinggi').textContent = rekor;
+        document.getElementById('menu-kalah').style.display = 'flex';
+    }
+</script>
+</body>
+</html>
