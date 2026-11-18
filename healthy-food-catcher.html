@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healthy Food Catcher</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Trebuchet MS',sans-serif;background:linear-gradient(135deg,#d9f8df,#fff6d8);text-align:center;color:#315b43}
+.container{width:95%;max-width:850px;margin:25px auto;padding:20px;background:white;border-radius:25px;box-shadow:0 8px 25px #00000015}
+h1{color:#31834d;margin-bottom:5px}
+.description{color:#66836d;font-size:14px}
+.scoreboard{display:flex;justify-content:space-around;gap:10px;margin:20px 0;flex-wrap:wrap}
+.score-box{background:#eaf8ed;padding:12px 20px;border-radius:15px;min-width:110px}
+.score-box strong{display:block;font-size:23px;color:#287c43}
+canvas{display:block;width:100%;background:linear-gradient(#e5f8ff,#f2ffed);border:3px solid #b8e5c1;border-radius:18px;touch-action:none;cursor:grab}
+.buttons{margin-top:15px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+button,.upload{border:none;background:#45a968;color:white;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:bold;cursor:pointer}
+button:hover,.upload:hover{background:#287c43}
+#photo{display:none}
+.instructions{margin-top:20px;background:#f2faf1;padding:15px;border-radius:15px;font-size:14px}
+#message{font-weight:bold;margin-top:12px;min-height:22px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🥗 Healthy Food Catcher</h1>
+<p class="description">Tangkap makanan sehat dan hindari makanan kurang sehat!</p>
+<div class="scoreboard">
+  <div class="score-box">Skor<strong id="score">0</strong></div>
+  <div class="score-box">Waktu<strong><span id="time">60</span>s</strong></div>
+  <div class="score-box">Tertangkap<strong id="caught">0</strong></div>
+</div>
+<canvas id="game" width="800" height="500"></canvas>
+<div id="message">Tekan tombol MULAI untuk bermain!</div>
+<div class="buttons">
+  <button onclick="startGame()">▶ MULAI</button>
+  <button onclick="restartGame()">↻ ULANGI</button>
+  <label class="upload" for="photo">📷 Pilih Foto Karakter</label>
+  <input type="file" id="photo" accept="image/*">
+</div>
+<div class="instructions">
+<h3>📖 Cara Bermain</h3>
+<p>🍎 Makanan sehat = <b>+10 poin</b></p>
+<p>🍔 Makanan kurang sehat = <b>-5 poin</b></p>
+<p>🖱️ Geser karakter ke kanan dan kiri untuk menangkap makanan.</p>
+<p>⏰ Kumpulkan poin sebanyak mungkin dalam 60 detik!</p>
+</div>
+</div>
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+const scoreText=document.getElementById("score");
+const timeText=document.getElementById("time");
+const caughtText=document.getElementById("caught");
+const message=document.getElementById("message");
+const healthyFoods=["🍎","🍌","🥦","🥕","🍊","🍓","🍇","🥑","🍉","🥬"];
+const unhealthyFoods=["🍔","🍟","🍕","🍩","🍭","🧁","🥤","🍫"];
+let score=0,time=60,caught=0,foods=[],running=false,gameOver=false;
+let lastTime=0,spawnTimer=0,animationId;
+let player={x:400,y:425,width:90,height:65,speed:7};
+let characterImage=null;
+
+document.getElementById("photo").addEventListener("change",function(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(event){
+    const img=new Image();
+    img.onload=function(){characterImage=img;drawGame()};
+    img.src=event.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+function drawPlayer(){
+  if(characterImage){
+    // Foto tampil tanpa ilustrasi jilbab, dengan crop oval agar tidak berbentuk kotak.
+    const x = player.x;
+    const y = player.y;
+    const w = 58;
+    const h = 91;
+    const left = x - w / 2;
+    const top = y - h / 2;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(x, y, w / 2, h / 2, 0, 0, Math.PI * 2);
+    ctx.clip();
+
+    // Foto memenuhi area oval tanpa mengubah proporsinya.
+    const scale = Math.max(w / characterImage.width, h / characterImage.height);
+    const sw = w / scale;
+    const sh = h / scale;
+    const sx = (characterImage.width - sw) / 2;
+    const sy = (characterImage.height - sh) / 2;
+    ctx.drawImage(characterImage, sx, sy, sw, sh, left, top, w, h);
+    ctx.restore();
+
+    // Bingkai tipis netral, bukan bentuk jilbab.
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(x, y, w / 2, h / 2, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = "#e6b6d2";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+  }else{
+    // Karakter chibi perempuan memakai jilbab pastel
+    const x = player.x;
+    const y = player.y;
+
+    // Siluet jilbab bagian belakang
+    ctx.fillStyle = "#b99adf";
+    ctx.beginPath();
+    ctx.moveTo(x-20, y-35);
+    ctx.quadraticCurveTo(x-29, y-18, x-24, y+8);
+    ctx.quadraticCurveTo(x-22, y+28, x, y+32);
+    ctx.quadraticCurveTo(x+22, y+28, x+24, y+8);
+    ctx.quadraticCurveTo(x+29, y-18, x+20, y-35);
+    ctx.quadraticCurveTo(x, y-53, x-20, y-35);
+    ctx.fill();
+
+    // Wajah
+    ctx.fillStyle = "#ffdbbd";
+    ctx.beginPath();
+    ctx.ellipse(x, y-19, 16, 20, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Bagian depan jilbab membingkai wajah
+    ctx.fillStyle = "#d9c4f2";
+    ctx.beginPath();
+    ctx.moveTo(x-19, y-29);
+    ctx.quadraticCurveTo(x-17, y-49, x, y-48);
+    ctx.quadraticCurveTo(x+17, y-49, x+19, y-29);
+    ctx.quadraticCurveTo(x+17, y-12, x+12, y+1);
+    ctx.quadraticCurveTo(x+8, y+8, x, y+12);
+    ctx.quadraticCurveTo(x-8, y+8, x-12, y+1);
+    ctx.quadraticCurveTo(x-17, y-12, x-19, y-29);
+    ctx.fill();
+
+    // Wajah terlihat di dalam bingkai jilbab
+    ctx.fillStyle = "#ffdbbd";
+    ctx.beginPath();
+    ctx.ellipse(x, y-18, 14, 17, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Mata
+    ctx.fillStyle = "#38251f";
+    ctx.beginPath();
+    ctx.arc(x-6, y-19, 2.2, 0, Math.PI*2);
+    ctx.arc(x+6, y-19, 2.2, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(x-6.7, y-20, 0.8, 0, Math.PI*2);
+    ctx.arc(x+5.3, y-20, 0.8, 0, Math.PI*2);
+    ctx.fill();
+
+    // Pipi merona dan senyum
+    ctx.fillStyle = "#f5a6a0";
+    ctx.beginPath();
+    ctx.ellipse(x-10, y-11, 3.5, 2, 0, 0, Math.PI*2);
+    ctx.ellipse(x+10, y-11, 3.5, 2, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = "#a85e58";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.arc(x, y-11, 3, 0.15, Math.PI-0.15);
+    ctx.stroke();
+
+    // Baju pastel
+    ctx.fillStyle = "#ffabc8";
+    ctx.beginPath();
+    ctx.roundRect(x-18, y+8, 36, 24, 9);
+    ctx.fill();
+
+    // Kerah kecil
+    ctx.fillStyle = "#fff1f5";
+    ctx.beginPath();
+    ctx.moveTo(x-6, y+9);
+    ctx.lineTo(x, y+15);
+    ctx.lineTo(x+6, y+9);
+    ctx.fill();
+
+    // Tangan
+    ctx.strokeStyle = "#ffdbbd";
+    ctx.lineWidth = 7;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x-15, y+14);
+    ctx.lineTo(x-24, y+25);
+    ctx.moveTo(x+15, y+14);
+    ctx.lineTo(x+24, y+25);
+    ctx.stroke();
+
+    // Rok dan sepatu
+    ctx.fillStyle = "#a9c4ef";
+    ctx.beginPath();
+    ctx.moveTo(x-13, y+29);
+    ctx.lineTo(x+13, y+29);
+    ctx.lineTo(x+17, y+39);
+    ctx.lineTo(x-17, y+39);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = "#fff4dc";
+    ctx.beginPath();
+    ctx.ellipse(x-9, y+40, 6, 3, 0, 0, Math.PI*2);
+    ctx.ellipse(x+9, y+40, 6, 3, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+function createFood(){
+  const healthy=Math.random()<0.65;
+  const list=healthy?healthyFoods:unhealthyFoods;
+  foods.push({x:Math.random()*740+30,y:-30,emoji:list[Math.floor(Math.random()*list.length)],healthy,speed:Math.random()*2+2.5,size:35});
+}
+function drawFoods(){
+  foods.forEach(food=>{ctx.font=food.size+"px Arial";ctx.textAlign="center";ctx.fillText(food.emoji,food.x,food.y)});
+}
+function drawGame(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#b5e5a7";ctx.fillRect(0,475,800,25);
+  drawFoods();drawPlayer();
+}
+function startGame(){
+  if(running)return;
+  if(gameOver){restartGame();return}
+  running=true;message.textContent="Ayo tangkap makanan sehat! 🥗";
+  lastTime=0;animationId=requestAnimationFrame(gameLoop);
+}
+function restartGame(){
+  cancelAnimationFrame(animationId);
+  score=0;time=60;caught=0;foods=[];player.x=400;
+  running=false;gameOver=false;spawnTimer=0;lastTime=0;
+  updateScoreboard();message.textContent="Permainan siap dimulai!";drawGame();
+}
+function updateScoreboard(){
+  scoreText.textContent=score;timeText.textContent=Math.ceil(time);caughtText.textContent=caught;
+}
+function checkCollision(food){
+  return food.x>player.x-55&&food.x<player.x+55&&food.y>player.y-55&&food.y<player.y+25;
+}
+function endGame(){
+  running=false;gameOver=true;
+  message.textContent="🎉 Waktu habis! Skor akhir kamu: "+score+" poin.";
+}
+function gameLoop(timestamp){
+  if(!running)return;
+  if(!lastTime)lastTime=timestamp;
+  const delta=Math.min((timestamp-lastTime)/1000,0.05);
+  lastTime=timestamp;
+  spawnTimer+=delta;
+  if(spawnTimer>=0.8){createFood();spawnTimer=0}
+  time-=delta;
+  if(time<=0){time=0;updateScoreboard();drawGame();endGame();return}
+  for(let i=foods.length-1;i>=0;i--){
+    const food=foods[i];food.y+=food.speed;
+    if(checkCollision(food)){
+      if(food.healthy){score+=10;message.textContent="Bagus! +10 poin 🍎"}
+      else{score-=5;message.textContent="Oops! -5 poin 🍔"}
+      caught++;foods.splice(i,1);continue;
+    }
+    if(food.y>510)foods.splice(i,1);
+  }
+  updateScoreboard();drawGame();
+  animationId=requestAnimationFrame(gameLoop);
+}
+document.addEventListener("keydown",function(e){
+  if(!running)return;
+  if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A")player.x-=player.speed*4;
+  if(e.key==="ArrowRight"||e.key==="d"||e.key==="D")player.x+=player.speed*4;
+  player.x=Math.max(45,Math.min(755,player.x));
+});
+let dragging=false;
+canvas.addEventListener("pointerdown",function(e){
+  if(!running)return;
+  dragging=true;canvas.setPointerCapture(e.pointerId);movePlayer(e);
+});
+canvas.addEventListener("pointermove",function(e){if(dragging&&running)movePlayer(e)});
+canvas.addEventListener("pointerup",function(){dragging=false});
+canvas.addEventListener("pointercancel",function(){dragging=false});
+function movePlayer(e){
+  const rect=canvas.getBoundingClientRect();
+  const scaleX=canvas.width/rect.width;
+  player.x=(e.clientX-rect.left)*scaleX;
+  player.x=Math.max(45,Math.min(755,player.x));
+}
+drawGame();
+</script>
+</body>
+</html>
