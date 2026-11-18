@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tangkap Makanan Sehat</title>
+    <title>Tangkap 4 Sehat 5 Sempurna</title>
     <style>
         * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
         body {
@@ -100,8 +100,8 @@
 
     <!-- MENU AWAL -->
     <div id="menu-awal" class="overlay">
-        <h1 style="margin:0 0 10px; color:#2d3436;">🍎 Tangkap Sehat 🥦</h1>
-        <p style="color:#636e72; font-size:14px;">Kumpulkan <b>500 poin</b> makanan sehat untuk menang dan hindari makanan tidak sehat (-nyawa)!</p>
+        <h1 style="margin:0 0 10px; color:#2d3436;">🥗 Tangkap 4 Sehat 5 Sempurna 🥛</h1>
+        <p style="color:#636e72; font-size:14px;">Tangkap <b>Nasi, Ayam, Ikan, Sayur, Buah, & Susu</b> sampai <b>500 poin</b>! Hindari makanan cepat saji (-nyawa).</p>
         
         <div style="margin: 15px 0; background:#f1f2f6; padding:12px; border-radius:12px; width:100%;">
             <label style="font-size:13px; font-weight:bold; display:block; margin-bottom:6px;">📸 Pilih Foto Karakter (Opsional):</label>
@@ -111,4 +111,220 @@
         <button type="button" class="btn-main" onclick="mulaiGame()">▶ MULAI GAME</button>
     </div>
 
-    <!-- MENU KALAH (OBESITAS)
+    <!-- MENU KALAH (OBESITAS) -->
+    <div id="menu-kalah" class="overlay" style="display:none;">
+        <div style="font-size: 50px; margin-bottom: 5px;">🍔⚠️</div>
+        <h1 style="color:#d63031; margin:0 0 8px; font-size: 28px;">KAMU OBESITAS!</h1>
+        
+        <div class="info-box">
+            Hal ini terjadi <b>karena kebanyakan mengonsumsi makanan yang tidak sehat atau cepat saji</b> yang tinggi gula, garam, dan lemak jenuh. Yuk, jaga pola makan seimbang!
+        </div>
+
+        <p style="font-size:18px; margin:8px 0 4px;">Skor Kamu: <b id="skor-akhir">0</b></p>
+        <p style="font-size:14px; color:#636e72; margin:0 0 10px;">Skor Tertinggi: <b id="skor-tertinggi">0</b></p>
+        <button type="button" class="btn-main" onclick="mulaiGame()">🔄 MAIN LAGI</button>
+    </div>
+
+    <!-- MENU MENANG (500 POIN) -->
+    <div id="menu-menang" class="overlay" style="display:none;">
+        <div style="font-size: 55px; margin-bottom: 5px;">🏆🍚🍗</div>
+        <h1 style="color:#00b894; margin:0 0 8px; font-size: 28px;">SELAMAT, KAMU MENANG!</h1>
+        
+        <div class="win-box">
+            Luar biasa! Kamu berhasil mengumpulkan 500 poin makanan bergizi. Ini membuktikan bahwa <b>kamu memiliki pola makan yang bagus dan sudah memenuhi 4 sehat 5 sempurna</b> (Nasi, Lauk, Sayur, Buah, dan Susu)!
+        </div>
+
+        <p style="font-size:18px; margin:8px 0 10px;">Skor Maksimal: <b>500</b> ⭐</p>
+        <button type="button" class="btn-main" onclick="mulaiGame()">🔄 MAIN LAGI</button>
+    </div>
+</div>
+
+<script>
+    var skor = 0;
+    var nyawa = 3;
+    var jalan = false;
+    var posisiX = 150;
+    var daftarMakanan = [];
+    var loopGame, loopMuncul;
+
+    var area = document.getElementById('play-area');
+    var pemain = document.getElementById('player');
+
+    // Makanan Sehat (4 Sehat 5 Sempurna) & Tidak Sehat
+    var listItem = [
+        { ikon: '🍚', sehat: true, poin: 10 }, // Nasi
+        { ikon: '🍗', sehat: true, poin: 15 }, // Ayam
+        { ikon: '🐟', sehat: true, poin: 15 }, // Ikan
+        { ikon: '🥦', sehat: true, poin: 10 }, // Sayur
+        { ikon: '🍎', sehat: true, poin: 10 }, // Buah
+        { ikon: '🥛', sehat: true, poin: 20 }, // Susu
+        { ikon: '🍔', sehat: false, poin: -10 },
+        { ikon: '🍕', sehat: false, poin: -10 },
+        { ikon: '🍩', sehat: false, poin: -15 },
+        { ikon: '🥤', sehat: false, poin: -15 }
+    ];
+
+    function gantiFoto(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            pemain.style.backgroundImage = "url('" + ev.target.result + "')";
+            pemain.textContent = "";
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function geserPemain(clientX) {
+        if (!jalan) return;
+        var rect = area.getBoundingClientRect();
+        var x = clientX - rect.left - 37.5;
+        var batasKanan = area.clientWidth - 75;
+        if (x < 0) x = 0;
+        if (x > batasKanan) x = batasKanan;
+        posisiX = x;
+        pemain.style.left = posisiX + 'px';
+    }
+
+    area.addEventListener('mousemove', function(e) { geserPemain(e.clientX); });
+    area.addEventListener('mousedown', function(e) { geserPemain(e.clientX); });
+    area.addEventListener('touchmove', function(e) {
+        geserPemain(e.touches[0].clientX);
+        e.preventDefault();
+    }, { passive: false });
+    area.addEventListener('touchstart', function(e) {
+        geserPemain(e.touches[0].clientX);
+    }, { passive: true });
+
+    function bersihkanMakanan() {
+        var sisa = document.querySelectorAll('.food');
+        for (var i = 0; i < sisa.length; i++) { sisa[i].remove(); }
+        daftarMakanan = [];
+    }
+
+    function mulaiGame() {
+        document.getElementById('menu-awal').style.display = 'none';
+        document.getElementById('menu-kalah').style.display = 'none';
+        document.getElementById('menu-menang').style.display = 'none';
+
+        skor = 0;
+        nyawa = 3;
+        jalan = true;
+        document.getElementById('skor').textContent = skor;
+        document.getElementById('nyawa').textContent = nyawa;
+
+        posisiX = (area.clientWidth / 2) - 37.5;
+        pemain.style.left = posisiX + 'px';
+
+        bersihkanMakanan();
+
+        clearInterval(loopGame);
+        clearInterval(loopMuncul);
+
+        loopGame = setInterval(updateFrame, 20);
+        loopMuncul = setInterval(buatMakanan, 750);
+    }
+
+    function buatMakanan() {
+        if (!jalan) return;
+        var data = listItem[Math.floor(Math.random() * listItem.length)];
+        var el = document.createElement('div');
+        el.className = 'food';
+        el.textContent = data.ikon;
+
+        var startX = Math.random() * (area.clientWidth - 48);
+        el.style.left = startX + 'px';
+        el.style.top = '-50px';
+        area.appendChild(el);
+
+        daftarMakanan.push({
+            el: el, x: startX, y: -50,
+            kecepatan: 3 + Math.random() * 2.5,
+            data: data
+        });
+    }
+
+    function updateFrame() {
+        if (!jalan) return;
+        var batasPemainY = area.clientHeight - 100;
+
+        for (var i = daftarMakanan.length - 1; i >= 0; i--) {
+            if (!jalan) return;
+
+            var m = daftarMakanan[i];
+            m.y += m.kecepatan;
+            m.el.style.top = m.y + 'px';
+
+            if (m.y + 45 >= batasPemainY && m.y <= batasPemainY + 75 &&
+                m.x + 45 >= posisiX && m.x <= posisiX + 75) {
+                kenaMakanan(m);
+                if (!jalan) return;
+                m.el.remove();
+                daftarMakanan.splice(i, 1);
+                continue;
+            }
+
+            if (m.y > area.clientHeight) {
+                m.el.remove();
+                daftarMakanan.splice(i, 1);
+            }
+        }
+    }
+
+    function kenaMakanan(m) {
+        var teks = document.createElement('div');
+        teks.className = 'pop';
+        teks.style.left = m.x + 'px';
+        teks.style.top = (area.clientHeight - 90) + 'px';
+
+        if (m.data.sehat) {
+            skor = Math.min(500, skor + m.data.poin);
+            teks.textContent = '+' + m.data.poin;
+            teks.style.color = '#00b894';
+        } else {
+            skor = Math.max(0, skor + m.data.poin);
+            nyawa -= 1;
+            teks.textContent = m.data.poin + ' ❤️-1';
+            teks.style.color = '#d63031';
+        }
+
+        document.getElementById('skor').textContent = skor;
+        document.getElementById('nyawa').textContent = nyawa;
+        area.appendChild(teks);
+        setTimeout(function() { teks.remove(); }, 700);
+
+        if (skor >= 500) {
+            menangGame();
+        } else if (nyawa <= 0) {
+            selesaiGame();
+        }
+    }
+
+    function menangGame() {
+        jalan = false;
+        clearInterval(loopGame);
+        clearInterval(loopMuncul);
+        bersihkanMakanan();
+
+        localStorage.setItem('rekorSehat', 500);
+        document.getElementById('menu-menang').style.display = 'flex';
+    }
+
+    function selesaiGame() {
+        jalan = false;
+        clearInterval(loopGame);
+        clearInterval(loopMuncul);
+        bersihkanMakanan();
+
+        var rekor = localStorage.getItem('rekorSehat') || 0;
+        if (skor > rekor) {
+            rekor = skor;
+            localStorage.setItem('rekorSehat', rekor);
+        }
+        document.getElementById('skor-akhir').textContent = skor;
+        document.getElementById('skor-tertinggi').textContent = rekor;
+        document.getElementById('menu-kalah').style.display = 'flex';
+    }
+</script>
+</body>
+</html>
