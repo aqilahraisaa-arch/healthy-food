@@ -127,8 +127,8 @@
 
     <!-- MENU MENANG (500 POIN) -->
     <div id="menu-menang" class="overlay" style="display:none;">
-        <div style="font-size: 55px; margin-bottom: 5px;">🏆🍚🍗</div>
-        <h1 style="color:#00b894; margin:0 0 8px; font-size: 28px;">SELAMAT, KAMU MENANG!</h1>
+        <div style="font-size: 55px; margin-bottom: 5px;">🏆🥗🥛</div>
+        <h1 style="color:#00b894; margin:0 0 8px; font-size: 28px;">SELAMAT, KAMU SEHAT!</h1>
         
         <div class="win-box">
             Luar biasa! Kamu berhasil mengumpulkan 500 poin makanan bergizi. Ini membuktikan bahwa <b>kamu memiliki pola makan yang bagus dan sudah memenuhi 4 sehat 5 sempurna</b> (Nasi, Lauk, Sayur, Buah, dan Susu)!
@@ -150,14 +150,13 @@
     var area = document.getElementById('play-area');
     var pemain = document.getElementById('player');
 
-    // Makanan Sehat (4 Sehat 5 Sempurna) & Tidak Sehat
     var listItem = [
-        { ikon: '🍚', sehat: true, poin: 10 }, // Nasi
-        { ikon: '🍗', sehat: true, poin: 15 }, // Ayam
-        { ikon: '🐟', sehat: true, poin: 15 }, // Ikan
-        { ikon: '🥦', sehat: true, poin: 10 }, // Sayur
-        { ikon: '🍎', sehat: true, poin: 10 }, // Buah
-        { ikon: '🥛', sehat: true, poin: 20 }, // Susu
+        { ikon: '🍚', sehat: true, poin: 10 },
+        { ikon: '🍗', sehat: true, poin: 15 },
+        { ikon: '🐟', sehat: true, poin: 15 },
+        { ikon: '🥦', sehat: true, poin: 10 },
+        { ikon: '🍎', sehat: true, poin: 10 },
+        { ikon: '🥛', sehat: true, poin: 20 },
         { ikon: '🍔', sehat: false, poin: -10 },
         { ikon: '🍕', sehat: false, poin: -10 },
         { ikon: '🍩', sehat: false, poin: -15 },
@@ -255,7 +254,7 @@
             m.y += m.kecepatan;
             m.el.style.top = m.y + 'px';
 
-            if (m.y + 45 >= batasPemainY && m.y <= batasPemainY + 75 &&
+            if (m.y + 45 >= batasPemainY && m.y <= batasPemannY + 75 &&
                 m.x + 45 >= posisiX && m.x <= posisiX + 75) {
                 kenaMakanan(m);
                 if (!jalan) return;
