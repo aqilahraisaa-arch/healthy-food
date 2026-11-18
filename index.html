@@ -29,17 +29,17 @@
             overflow: hidden; touch-action: none;
         }
         #player {
-            position: absolute; bottom: 25px; left: 150px;
-            width: 75px; height: 75px; border-radius: 50%;
+            position: absolute; bottom: 15px; left: 150px;
+            width: 85px; height: 85px; border-radius: 50%;
             border: 4px solid #fff; background-color: #ffeaa7;
             background-size: cover; background-position: center;
             display: flex; justify-content: center; align-items: center;
-            font-size: 40px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-size: 45px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             z-index: 5;
         }
         .food {
-            position: absolute; width: 48px; height: 48px;
-            font-size: 36px; display: flex; justify-content: center; align-items: center;
+            position: absolute; width: 50px; height: 50px;
+            font-size: 38px; display: flex; justify-content: center; align-items: center;
             z-index: 4;
         }
         .overlay {
@@ -125,7 +125,7 @@
         <button type="button" class="btn-main" onclick="mulaiGame()">🔄 MAIN LAGI</button>
     </div>
 
-    <!-- MENU MENANG (500 POIN) -->
+    <!-- MENU MENANG -->
     <div id="menu-menang" class="overlay" style="display:none;">
         <div style="font-size: 55px; margin-bottom: 5px;">🏆🥗🥛</div>
         <h1 style="color:#00b894; margin:0 0 8px; font-size: 28px;">SELAMAT, KAMU SEHAT!</h1>
@@ -177,8 +177,8 @@
     function geserPemain(clientX) {
         if (!jalan) return;
         var rect = area.getBoundingClientRect();
-        var x = clientX - rect.left - 37.5;
-        var batasKanan = area.clientWidth - 75;
+        var x = clientX - rect.left - 42.5;
+        var batasKanan = area.clientWidth - 85;
         if (x < 0) x = 0;
         if (x > batasKanan) x = batasKanan;
         posisiX = x;
@@ -212,7 +212,7 @@
         document.getElementById('skor').textContent = skor;
         document.getElementById('nyawa').textContent = nyawa;
 
-        posisiX = (area.clientWidth / 2) - 37.5;
+        posisiX = (area.clientWidth / 2) - 42.5;
         pemain.style.left = posisiX + 'px';
 
         bersihkanMakanan();
@@ -231,14 +231,14 @@
         el.className = 'food';
         el.textContent = data.ikon;
 
-        var startX = Math.random() * (area.clientWidth - 48);
+        var startX = Math.random() * (area.clientWidth - 50);
         el.style.left = startX + 'px';
         el.style.top = '-50px';
         area.appendChild(el);
 
         daftarMakanan.push({
             el: el, x: startX, y: -50,
-            kecepatan: 3 + Math.random() * 2.5,
+            kecepatan: 3 + Math.random() * 2,
             data: data
         });
     }
@@ -254,8 +254,13 @@
             m.y += m.kecepatan;
             m.el.style.top = m.y + 'px';
 
-            if (m.y + 45 >= batasPemainY && m.y <= batasPemainY + 75 &&
-                m.x + 45 >= posisiX && m.x <= posisiX + 75) {
+            // Deteksi tabrakan yang diperluas agar lebih gampang ketangkep
+            if (
+                m.y + 40 >= batasPemainY && 
+                m.y <= batasPemainY + 85 &&
+                m.x + 40 >= posisiX && 
+                m.x <= posisiX + 85
+            ) {
                 kenaMakanan(m);
                 if (!jalan) return;
                 m.el.remove();
